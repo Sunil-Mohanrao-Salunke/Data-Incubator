@@ -1,0 +1,38 @@
+---
+title: "R Notebook"
+output:
+  html_document:
+    df_print: paged
+editor_options:
+  chunk_output_type: inline
+---
+
+#Plot 2
+
+```{r, message=FALSE, warning=FALSE}
+library(tidyverse)
+#Read boston crime data
+crime_data_boston <- read_csv("crime.csv")
+
+#Check if data is loaded properly
+head(crime_data_boston)
+```
+
+```{r}
+#Let's find out the areas where most crimes are committed in Boston.
+crime_data_boston %>% 
+  select(STREET) %>% 
+  group_by(STREET) %>%
+  filter(STREET != "NA") %>% 
+  summarise(crime_frequency = n()) %>%
+  arrange(desc(crime_frequency)) %>% 
+  head(10) %>% 
+  ggplot(aes(x = reorder(STREET, crime_frequency), y = crime_frequency)) +
+  geom_bar(stat = "identity",fill = "orange", color = "black", position = "dodge") +
+  coord_flip() +
+  geom_label(aes(x = STREET, y = crime_frequency, label = paste(round(crime_frequency/1000, digits = 2), "k"))) +
+  ggtitle("Areas where crimes happens most in Boston") +
+  labs(x = "Area Name", y = "Crime Frequency", caption = "Data Source: https://www.kaggle.com, 1k = 1000 records")
+
+
+```
