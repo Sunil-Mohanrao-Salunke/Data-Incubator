@@ -1,0 +1,40 @@
+---
+title: "plot1_1"
+author: "Sunil"
+date: "2/4/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#Plot 1
+```{r, message=FALSE, warning=FALSE}
+library(tidyverse)
+#Read boston crime data
+crime_data_boston <- read_csv("crime.csv")
+
+#Check if data is loaded properly
+head(crime_data_boston)
+```
+
+```{r, message=FALSE, warning=FALSE}
+#let's do exploratory data analysis
+library(tidyverse)
+
+#Plot information about what crimes are most frequently occuring in Boston.This will help law inforcement as well as community supoort group to divert or allocate type of resources.
+crime_data_boston %>% 
+  select(OFFENSE_CODE_GROUP, DAY_OF_WEEK) %>% 
+  group_by(OFFENSE_CODE_GROUP) %>%
+  filter(OFFENSE_CODE_GROUP != "Other") %>% 
+  summarise(crime_frequency = n()) %>% 
+  arrange(desc(crime_frequency)) %>% 
+  head(10) %>% 
+  ggplot(aes(x = reorder(OFFENSE_CODE_GROUP, desc(crime_frequency)), y = crime_frequency)) +
+  geom_col(fill = "orange", color = "black") +
+  ggtitle("Most frequently committed crimes in Boston") +
+  labs(x = "Crime Type", y = "Crime Frequency", caption = "Data Source: https://www.kaggle.com, 1k = 1000 records") +
+  geom_label(aes(x = OFFENSE_CODE_GROUP, y = crime_frequency, label = paste(round(crime_frequency/1000, digits = 2), "k")))+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
+```
