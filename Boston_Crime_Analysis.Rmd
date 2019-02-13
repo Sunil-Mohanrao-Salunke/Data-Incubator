@@ -1,0 +1,66 @@
+---
+title: "Boston Crime Data Analysis"
+output: 
+  html_document:
+    keep_md: True
+    df_print: paged
+editor_options: 
+  chunk_output_type: inline
+---
+
+```{r, echo = FALSE}
+knitr::opts_chunk$set(
+  fig.path = "README_figs/README-"
+)
+```
+
+
+```{r, message=FALSE, warning=FALSE}
+#Read boston crime data
+library(tidyverse)
+crime_data_boston <- read_csv("crime.csv")
+
+#Check if data is loaded properly
+head(crime_data_boston)
+```
+```{r, Most_Frequent_Crimes, message=FALSE, warning=FALSE}
+#let's do exploratory data analysis
+library(tidyverse)
+
+#Plot information about what crimes are most frequently occuring in Boston.This will help law inforcement as well as community supoort group to divert or allocate type of resources.
+crime_data_boston %>% 
+  select(OFFENSE_CODE_GROUP, DAY_OF_WEEK) %>% 
+  group_by(OFFENSE_CODE_GROUP) %>%
+  filter(OFFENSE_CODE_GROUP != "Other") %>% 
+  summarise(crime_frequency = n()) %>% 
+  arrange(desc(crime_frequency)) %>% 
+  head(10) %>% 
+  ggplot(aes(x = reorder(OFFENSE_CODE_GROUP, desc(crime_frequency)), y = crime_frequency)) +
+  geom_col(fill = "orange", color = "black") +
+  ggtitle("Most frequently committed crimes in Boston") +
+  labs(x = "Crime Type", y = "Crime Frequency", caption = "Data Source: https://www.kaggle.com, 1k = 1000 records") +
+  geom_label(aes(x = OFFENSE_CODE_GROUP, y = crime_frequency, label = paste(round(crime_frequency/1000, digits = 2), "k")))+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
+
+```
+
+```{r, High_Crime_Areas, message=FALSE, warning=FALSE}
+#Let's find out the areas where most crimes are committed in Boston.
+crime_data_boston %>% 
+  select(STREET) %>% 
+  group_by(STREET) %>%
+  filter(STREET != "NA") %>% 
+  summarise(crime_frequency = n()) %>%
+  arrange(desc(crime_frequency)) %>% 
+  head(10) %>% 
+  ggplot(aes(x = reorder(STREET, crime_frequency), y = crime_frequency)) +
+  geom_bar(stat = "identity",fill = "orange", color = "black", position = "dodge") +
+  coord_flip() +
+  geom_label(aes(x = STREET, y = crime_frequency, label = paste(round(crime_frequency/1000, digits = 2), "k"))) +
+  ggtitle("Areas where crimes happens most in Boston") +
+  labs(x = "Area Name", y = "Crime Frequency", caption = "Data Source: https://www.kaggle.com, 1k = 1000 records")
+```
+
+
+
+
