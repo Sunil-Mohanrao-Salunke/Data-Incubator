@@ -38,13 +38,19 @@ crime_data_boston %>%
   ggplot(aes(x = reorder(OFFENSE_CODE_GROUP, desc(crime_frequency)), y = crime_frequency)) +
   geom_col(fill = "orange", color = "black") +
   ggtitle("Most frequently committed crimes in Boston") +
-  labs(x = "Crime Type", y = "Crime Frequency", caption = "Data Source: https://www.kaggle.com, 1k = 1000 records") +
+  labs(x = "Crime Type", y = "Crime Frequency", caption = "Data Source: https://www.kaggle.com, 1k = 1000 records, Duration: 2015-2018") +
   geom_label(aes(x = OFFENSE_CODE_GROUP, y = crime_frequency, label = paste(round(crime_frequency/1000, digits = 2), "k")))+
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
 
 ```
 
-```{r, High_Crime_Areas, message=FALSE, warning=FALSE}
+1. "Vehicle Accidents" are the highest crimes committed followed by "Larceny".
+2. This provides very useful insights to law enforcement in order to understand the crime situation in Boston as well as it will be helpful for law enforcement to develop skilled resources to efficiently handle crimes which are most occurring.
+3. "Drug Violation" is one of the top 5 committed crimes in Boston. It's one of the concerning facts that was found out through the analysis.
+4. Diving deep in the further analysis will also be helpful for local community support group or pharmacy and hospitals to allocate resources in the areas where "Drug Violation" happens most. 
+
+
+```{r, High_Crime_Areas_Boston, message=FALSE, warning=FALSE}
 #Let's find out the areas where most crimes are committed in Boston.
 crime_data_boston %>% 
   select(STREET) %>% 
@@ -58,9 +64,30 @@ crime_data_boston %>%
   coord_flip() +
   geom_label(aes(x = STREET, y = crime_frequency, label = paste(round(crime_frequency/1000, digits = 2), "k"))) +
   ggtitle("Areas where crimes happens most in Boston") +
-  labs(x = "Area Name", y = "Crime Frequency", caption = "Data Source: https://www.kaggle.com, 1k = 1000 records")
+  labs(x = "Area Name", y = "Crime Frequency", caption = "Data Source: https://www.kaggle.com, 1k = 1000 records, Duration: 2015-2018")
 ```
 
+1. Areas with highest crimes are 1. Washington Street, 2. Blue Hill Avenue, 3. Boylston Street, 4. Dorchester Avenue, 5.Tremont Street. 
+
+```{r, Drug_Crime_Distribution_Boston, message=FALSE, warning=FALSE}
+#Extract instances of drug charges
+drug_crimes <- crime_data_boston %>% select(OFFENSE_CODE_GROUP, Lat, Long) %>%  
+  filter(OFFENSE_CODE_GROUP == "Drug Violation")
+
+#Plot on a map
+require(ggmap)
+register_google(key = "AIzaSyA5XYT88pSr8VdMuktU7MC4vLUFalfpLEk")
+
+#Find map center (lattitude and longitude) for "Boston, MA"
+map.center <- geocode("Boston, MA")
+
+#Create map object to plot datapoints
+Boston_map <- qmap(c(lon=map.center$lon, lat=map.center$lat), zoom=12)
 
 
+Boston_map + geom_point(aes(x=Long, y=Lat), data=drug_crimes, size=2, alpha=0.2, color="red") + 
+  ggtitle("Drug Charges in Boston by Location (2015-2018)")
+```
+
+1. This geo-map gives information about areas with high desnsity of drug crimes. Having aceess to hospitals or pharmacy will be helpful to lower down crimes in these areas.
 
